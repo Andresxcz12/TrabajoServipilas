@@ -1,0 +1,7 @@
+/* index.css o App.css */
+body, html {
+  margin: 0;
+  padding: 0;
+  background-color: #000;
+  overflow-x: hidden;
+}
