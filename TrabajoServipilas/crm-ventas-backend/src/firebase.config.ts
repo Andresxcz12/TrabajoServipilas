@@ -1,12 +1,30 @@
 import * as admin from 'firebase-admin';
-import * as serviceAccount from './config/serviceAccount.json';
+import * as path from 'path';
+import * as fs from 'fs';
 
-// Forzamos el uso del archivo JSON local que tiene el formato PEM perfecto
-const firebaseCredentials = serviceAccount;
+let firebaseCredentials: any;
+
+// Buscamos el archivo directamente en la raíz del proyecto (donde lo creará Render)
+const rootPath = path.resolve(process.cwd(), 'serviceAccount.json');
+// Ruta por si en local lo tienes dentro de src/config/
+const localPath = path.resolve(process.cwd(), 'src/config/serviceAccount.json');
+
+if (fs.existsSync(rootPath)) {
+  firebaseCredentials = JSON.parse(fs.readFileSync(rootPath, 'utf8'));
+} else if (fs.existsSync(localPath)) {
+  firebaseCredentials = JSON.parse(fs.readFileSync(localPath, 'utf8'));
+} else {
+  try {
+    const serviceAccount = require('./config/serviceAccount.json');
+    firebaseCredentials = serviceAccount;
+  } catch (error) {
+    throw new Error('No se pudo encontrar el archivo serviceAccount.json en la raíz ni en src/config/');
+  }
+}
 
 if (!admin.apps.length) {
   admin.initializeApp({
-    credential: admin.credential.cert(firebaseCredentials as any),
+    credential: admin.credential.cert(firebaseCredentials),
   });
 }
 
