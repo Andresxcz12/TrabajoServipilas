@@ -22,8 +22,21 @@ if (rawBase64) {
 
 // Fallback al archivo local (solo para desarrollo)
 if (!firebaseCredentials) {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  firebaseCredentials = require('./config/serviceAccount.json');
+  // Intentar leer desde la carpeta `src/config` relativa al root del proyecto
+  // (en producción `dist` no contiene los archivos fuente, por eso no use require('./config/...'))
+  try {
+    const fs = require('fs');
+    const path = require('path');
+    const candidate = path.join(process.cwd(), 'src', 'config', 'serviceAccount.json');
+    if (fs.existsSync(candidate)) {
+      const raw = fs.readFileSync(candidate, 'utf8');
+      firebaseCredentials = JSON.parse(raw);
+    } else {
+      console.error('No FIREBASE_SERVICE_ACCOUNT env var and no src/config/serviceAccount.json found at', candidate);
+    }
+  } catch (err) {
+    console.error('Error loading local serviceAccount.json fallback:', err instanceof Error ? err.message : String(err));
+  }
 }
 
 // Comprobación rápida: imprimir si faltan campos esenciales (no imprime la clave privada)
