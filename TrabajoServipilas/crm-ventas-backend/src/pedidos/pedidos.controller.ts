@@ -7,8 +7,7 @@ import { LoginDto } from './dto/login.dto';
 export class PedidosController {
   constructor(private readonly pedidosService: PedidosService) {}
 
-@Post('login')
-@Post('login')
+  @Post('login')
   async login(@Body() loginDto: LoginDto) {
     // 1. Llamamos al servicio para validar
     const usuario = await this.pedidosService.login(loginDto);
