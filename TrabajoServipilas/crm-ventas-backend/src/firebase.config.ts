@@ -38,3 +38,9 @@ if (!admin.apps.length) {
 }
 
 export const db = admin.firestore();
+
+// Export a minimal, safe summary of credentials for health/debug endpoints
+export const firebaseCredSummary = {
+  client_email: firebaseCredentials?.client_email || null,
+  project_id: firebaseCredentials?.project_id || null,
+};
