@@ -3,23 +3,21 @@ import * as serviceAccount from './config/serviceAccount.json';
 
 let firebaseCredentials: any;
 
-if (process.env.FIREBASE_CONFIG_JSON) {
-  try {
-    // Parseamos el string completo que guardamos en Render
-    const parsedConfig = JSON.parse(process.env.FIREBASE_CONFIG_JSON);
-    
-    // Nos aseguramos de corregir estrictamente los saltos de línea de la llave PEM
-    parsedConfig.privateKey = parsedConfig.private_key.replace(/\\n/g, '\n');
-    parsedConfig.projectId = parsedConfig.project_id;
-    parsedConfig.clientEmail = parsedConfig.client_email;
+// Si estamos en Render, usamos las variables de entorno individuales de forma limpia
+if (process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY) {
+  
+  // TRUCO MÁGICO: Reemplaza los \n escritos por saltos de línea reales que Google sí entiende
+  const cleanPrivateKey = process.env.FIREBASE_PRIVATE_KEY
+    .replace(/\\n/g, '\n')
+    .trim();
 
-    firebaseCredentials = parsedConfig;
-  } catch (error) {
-    console.error('Error al parsear FIREBASE_CONFIG_JSON:', error);
-    firebaseCredentials = serviceAccount;
-  }
+  firebaseCredentials = {
+    projectId: process.env.FIREBASE_PROJECT_ID,
+    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+    privateKey: cleanPrivateKey,
+  };
 } else {
-  // Respaldo para tu entorno de desarrollo local
+  // Si estás en tu computadora (Local), usa el archivo local normal
   firebaseCredentials = {
     projectId: serviceAccount.project_id,
     clientEmail: serviceAccount.client_email,
