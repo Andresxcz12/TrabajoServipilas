@@ -10,13 +10,13 @@ if (rawBase64) {
   try {
     firebaseCredentials = JSON.parse(Buffer.from(rawBase64, 'base64').toString('utf8'));
   } catch (err) {
-    console.error('Failed to parse FIREBASE_SERVICE_ACCOUNT_BASE64:', err.message);
+    console.error('Failed to parse FIREBASE_SERVICE_ACCOUNT_BASE64:', err instanceof Error ? err.message : String(err));
   }
 } else if (rawJson) {
   try {
     firebaseCredentials = JSON.parse(rawJson);
   } catch (err) {
-    console.error('Failed to parse FIREBASE_SERVICE_ACCOUNT:', err.message);
+    console.error('Failed to parse FIREBASE_SERVICE_ACCOUNT:', err instanceof Error ? err.message : String(err));
   }
 }
 
