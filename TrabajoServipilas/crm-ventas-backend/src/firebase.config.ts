@@ -1,7 +1,9 @@
 import * as admin from 'firebase-admin';
+import * as fs from 'fs';
 
-// Leemos la configuración desde la variable de entorno
-const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT || '{}');
+// La ruta donde Render coloca los archivos secretos
+const secretPath = '/etc/secrets/serviceAccount.json';
+const serviceAccount = JSON.parse(fs.readFileSync(secretPath, 'utf8'));
 
 if (!admin.apps.length) {
   admin.initializeApp({
