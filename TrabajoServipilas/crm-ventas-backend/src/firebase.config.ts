@@ -1,25 +1,30 @@
 import * as admin from 'firebase-admin';
-import * as path from 'path';
-import * as fs from 'fs';
+import * as serviceAccount from './config/serviceAccount.json';
 
 let firebaseCredentials: any;
 
-// Buscamos el archivo directamente en la raíz del proyecto (donde lo creará Render)
-const rootPath = path.resolve(process.cwd(), 'serviceAccount.json');
-// Ruta por si en local lo tienes dentro de src/config/
-const localPath = path.resolve(process.cwd(), 'src/config/serviceAccount.json');
-
-if (fs.existsSync(rootPath)) {
-  firebaseCredentials = JSON.parse(fs.readFileSync(rootPath, 'utf8'));
-} else if (fs.existsSync(localPath)) {
-  firebaseCredentials = JSON.parse(fs.readFileSync(localPath, 'utf8'));
-} else {
+if (process.env.FIREBASE_CONFIG_JSON) {
   try {
-    const serviceAccount = require('./config/serviceAccount.json');
-    firebaseCredentials = serviceAccount;
+    // Parseamos el string completo que guardamos en Render
+    const parsedConfig = JSON.parse(process.env.FIREBASE_CONFIG_JSON);
+    
+    // Nos aseguramos de corregir estrictamente los saltos de línea de la llave PEM
+    parsedConfig.privateKey = parsedConfig.private_key.replace(/\\n/g, '\n');
+    parsedConfig.projectId = parsedConfig.project_id;
+    parsedConfig.clientEmail = parsedConfig.client_email;
+
+    firebaseCredentials = parsedConfig;
   } catch (error) {
-    throw new Error('No se pudo encontrar el archivo serviceAccount.json en la raíz ni en src/config/');
+    console.error('Error al parsear FIREBASE_CONFIG_JSON:', error);
+    firebaseCredentials = serviceAccount;
   }
+} else {
+  // Respaldo para tu entorno de desarrollo local
+  firebaseCredentials = {
+    projectId: serviceAccount.project_id,
+    clientEmail: serviceAccount.client_email,
+    privateKey: serviceAccount.private_key,
+  };
 }
 
 if (!admin.apps.length) {
