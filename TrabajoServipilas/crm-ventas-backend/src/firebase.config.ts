@@ -1,34 +1,24 @@
 import * as admin from 'firebase-admin';
-import * as serviceAccount from './config/serviceAccount.json';
-
-let firebaseCredentials: any;
-
-// Si estamos en Render, usamos las variables de entorno individuales de forma limpia
-if (process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY) {
-  
-  // TRUCO MÁGICO: Reemplaza los \n escritos por saltos de línea reales que Google sí entiende
-  const cleanPrivateKey = process.env.FIREBASE_PRIVATE_KEY
-    .replace(/\\n/g, '\n')
-    .trim();
-
-  firebaseCredentials = {
-    projectId: process.env.FIREBASE_PROJECT_ID,
-    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-    privateKey: cleanPrivateKey,
-  };
-} else {
-  // Si estás en tu computadora (Local), usa el archivo local normal
-  firebaseCredentials = {
-    projectId: serviceAccount.project_id,
-    clientEmail: serviceAccount.client_email,
-    privateKey: serviceAccount.private_key,
-  };
-}
 
 if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert(firebaseCredentials),
-  });
+  try {
+    const base64Config = process.env.FIREBASE_BASE64_JSON;
+    
+    if (!base64Config) {
+      throw new Error("La variable FIREBASE_BASE64_JSON no está configurada en Render");
+    }
+
+    // Decodifica el Base64 y lo convierte en el objeto JSON que Google espera
+    const credentials = JSON.parse(Buffer.from(base64Config, 'base64').toString('utf8'));
+    
+    admin.initializeApp({
+      credential: admin.credential.cert(credentials),
+    });
+    console.log("Firebase inicializado correctamente desde variable de entorno.");
+  } catch (error) {
+    console.error("Error crítico al inicializar Firebase:", error);
+    process.exit(1); // Esto detendrá el proceso si no conecta, para que veas el error en los logs de Render
+  }
 }
 
 export const db = admin.firestore();
