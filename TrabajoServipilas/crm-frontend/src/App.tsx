@@ -5,16 +5,17 @@ import { LayoutDashboard, ShoppingCart, ClipboardList, Pencil, Trash2, LogOut, S
 import { Login } from './Login';
 
 function App() {
+  // CAMBIA ESTA URL POR LA TUYA DE RAILWAY
+  const API_URL = 'https://trabajo-servipilas-production.up.railway.app';
+
   const [usuario, setUsuario] = useState<any>(null);
   const [listaPedidos, setListaPedidos] = useState<any[]>([]);
   const [editandoId, setEditandoId] = useState<string | null>(null);
   const [busqueda, setBusqueda] = useState(''); 
 
-  // --- MEJORA 1: ESTADOS PARA FILTROS AVANZADOS ---
   const [filtroTienda, setFiltroTienda] = useState('Todas');
-  const [filtroFecha, setFiltroFecha] = useState('Todos'); // 'Todos', 'Antes2026', 'Desde2026'
+  const [filtroFecha, setFiltroFecha] = useState('Todos'); 
 
-  // --- MEJORA 3: ESTADO PARA LAS NOTIFICACIONES TOAST ---
   const [toast, setToast] = useState<{ mensaje: string; visible: boolean; tipo: 'exito' | 'error' }>({
     mensaje: '',
     visible: false,
@@ -23,7 +24,6 @@ function App() {
 
   const [cargandoTabla, setCargandoTabla] = useState(false);
   const [guardandoForm, setGuardandoForm] = useState(false);
-
   const [paginaActual, setPaginaActual] = useState(1);
   const pedidosPorPagina = 10;
 
@@ -37,7 +37,6 @@ function App() {
 
   const [formData, setFormData] = useState<Pedido>(estadoInicial);
 
-  // --- MEJORA 3: FUNCIÓN PARA MOSTRAR SUTILEZAS FLOTANTES (TOASTS) ---
   const lanzarToast = (mensaje: string, tipo: 'exito' | 'error' = 'exito') => {
     setToast({ mensaje, visible: true, tipo });
     setTimeout(() => {
@@ -48,7 +47,7 @@ function App() {
   const cargarPedidos = async () => {
     setCargandoTabla(true);
     try {
-      const res = await axios.get('http://localhost:3000/pedidos');
+      const res = await axios.get(`${API_URL}/pedidos`);
       setListaPedidos(res.data);
     } catch (error) { 
       console.error(error); 
@@ -60,24 +59,19 @@ function App() {
 
   useEffect(() => { if (usuario) cargarPedidos(); }, [usuario]);
 
-  // Resetear paginación si cambian los criterios de búsqueda o filtros
   useEffect(() => {
     setPaginaActual(1);
   }, [busqueda, filtroTienda, filtroFecha]);
 
-  // --- MEJORA 1: LÓGICA DE FILTRADO MULTI-CRITERIO ---
   const pedidosFiltrados = useMemo(() => {
     return listaPedidos.filter(p => {
-      // 1. Filtro por buscador de texto (Cliente, Producto, SKU)
       const matchesTexto = 
         p.usuario?.toLowerCase().includes(busqueda.toLowerCase()) ||
         p.producto?.toLowerCase().includes(busqueda.toLowerCase()) ||
         p.sku?.toLowerCase().includes(busqueda.toLowerCase());
 
-      // 2. Filtro por Tienda selecta
       const matchesTienda = filtroTienda === 'Todas' || p.tienda === filtroTienda;
 
-      // 3. Filtro por temporalidad de fechas
       let matchesFecha = true;
       if (p.fechaVenta) {
         const añoPedido = new Date(p.fechaVenta).getFullYear();
@@ -87,12 +81,10 @@ function App() {
           matchesFecha = añoPedido >= 2026;
         }
       }
-
       return matchesTexto && matchesTienda && matchesFecha;
     });
   }, [listaPedidos, busqueda, filtroTienda, filtroFecha]);
 
-  // LÓGICA DE PAGINACIÓN
   const { pedidosPaginados, totalPaginas } = useMemo(() => {
     const total = Math.ceil(pedidosFiltrados.length / pedidosPorPagina);
     const indiceInicio = (paginaActual - 1) * pedidosPorPagina;
@@ -103,7 +95,6 @@ function App() {
     };
   }, [pedidosFiltrados, paginaActual]);
 
-  // LÓGICA DE ESTADÍSTICAS EN BASE A LO QUE SE MUESTRA
   const stats = useMemo(() => {
     const totalDinero = listaPedidos.reduce((acc, p) => acc + (Number(p.pagoTotal) || 0), 0);
     const ventasRappi = listaPedidos.filter(p => p.tienda === 'Rappi').length;
@@ -113,7 +104,6 @@ function App() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    
     setFormData((prevData) => {
       const newData = { ...prevData, [name]: value };
       if (name === 'unidad' || name === 'precioUnitario') {
@@ -130,10 +120,10 @@ function App() {
     setGuardandoForm(true);
     try {
       if (editandoId) {
-        await axios.patch(`http://localhost:3000/pedidos/${editandoId}`, formData);
+        await axios.patch(`${API_URL}/pedidos/${editandoId}`, formData);
         lanzarToast('¡Registro actualizado correctamente!', 'exito');
       } else {
-        await axios.post('http://localhost:3000/pedidos', formData);
+        await axios.post(`${API_URL}/pedidos`, formData);
         lanzarToast('¡Venta registrada exitosamente!', 'exito');
       }
       cancelarEdicion();
@@ -161,7 +151,7 @@ function App() {
     if (usuario.rol !== 'admin') return;
     if (window.confirm('¿Seguro que deseas eliminar de forma permanente este registro?')) {
       try {
-        await axios.delete(`http://localhost:3000/pedidos/${id}`);
+        await axios.delete(`${API_URL}/pedidos/${id}`);
         cargarPedidos();
         lanzarToast('El registro fue eliminado', 'exito');
       } catch (error) { 
@@ -175,8 +165,6 @@ function App() {
   return (
     <div style={darkBg}>
       <div style={{ maxWidth: '1450px', margin: '0 auto' }}>
-        
-        {/* HEADER */}
         <header style={headerStyle}>
           <h1 style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#fff', margin: 0 }}>
             <LayoutDashboard color="#a855f7" /> CRM <span style={{color: '#a855f7'}}>PREMIUM</span>
@@ -190,7 +178,6 @@ function App() {
           </div>
         </header>
 
-        {/* METRICAS */}
         <div style={statsGrid}>
           <div style={statBox}>
             <div style={statHeader}><DollarSign size={16} color="#a855f7" /> RECAUDACIÓN TOTAL</div>
@@ -220,7 +207,6 @@ function App() {
         </div>
 
         <div style={mainGrid}>
-          {/* FORMULARIO */}
           <section style={glassCard}>
             <h3 style={cardTitle}><ShoppingCart size={20} color="#a855f7" /> {editandoId ? 'EDITAR ENTRADA' : 'NUEVA ENTRADA'}</h3>
             <form onSubmit={handleSubmit} style={formGrid}>
@@ -269,13 +255,10 @@ function App() {
             </form>
           </section>
 
-          {/* TABLA HISTORIAL MEJORADA CON FILTROS */}
           <section style={glassCard}>
             <div style={{display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '20px'}}>
               <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                 <h3 style={{...cardTitle, margin: 0}}><ClipboardList size={20} color="#a855f7" /> HISTORIAL</h3>
-                
-                {/* BUSCADOR */}
                 <div style={searchWrapper}>
                   <Search size={16} color="#9ca3af" />
                   <input 
@@ -286,28 +269,17 @@ function App() {
                   />
                 </div>
               </div>
-
-              {/* --- MEJORA 1: BARRA DE FILTROS AVANZADOS (TIENDA Y FECHA) --- */}
               <div style={filterBarContainer}>
                 <div style={{display: 'flex', alignItems: 'center', gap: '8px', color: '#a0aec0', fontSize: '0.8rem'}}>
                   <Filter size={14} color="#a855f7" /> <span>Filtrar por:</span>
                 </div>
                 <div style={{display: 'flex', gap: '10px', flex: 1}}>
-                  <select 
-                    value={filtroTienda} 
-                    onChange={(e) => setFiltroTienda(e.target.value)} 
-                    style={filterDropdown}
-                  >
+                  <select value={filtroTienda} onChange={(e) => setFiltroTienda(e.target.value)} style={filterDropdown}>
                     <option value="Todas">Todas las Tiendas</option>
                     <option value="Rappi">Solo Rappi</option>
                     <option value="Mercado Libre">Solo Mercado Libre</option>
                   </select>
-
-                  <select 
-                    value={filtroFecha} 
-                    onChange={(e) => setFiltroFecha(e.target.value)} 
-                    style={filterDropdown}
-                  >
+                  <select value={filtroFecha} onChange={(e) => setFiltroFecha(e.target.value)} style={filterDropdown}>
                     <option value="Todos">Todos los Periodos</option>
                     <option value="Antes2026">Ventas anteriores a 2026</option>
                     <option value="Desde2026">Ventas año 2026 en adelante</option>
@@ -320,26 +292,14 @@ function App() {
               <table style={darkTable}>
                 <thead>
                   <tr style={tableHeaderRow}>
-                    <th>FECHA</th>
-                    <th>CLIENTE</th>
-                    <th>PRODUCTO</th>
-                    <th>TOTAL</th>
-                    <th>OPC.</th>
+                    <th>FECHA</th><th>CLIENTE</th><th>PRODUCTO</th><th>TOTAL</th><th>OPC.</th>
                   </tr>
                 </thead>
                 <tbody>
                   {cargandoTabla ? (
-                    <tr>
-                      <td colSpan={5} style={{textAlign: 'center', padding: '30px', color: '#9ca3af', fontSize: '0.9rem'}}>
-                        Cargando historial de pedidos...
-                      </td>
-                    </tr>
+                    <tr><td colSpan={5} style={{textAlign: 'center', padding: '30px', color: '#9ca3af'}}>Cargando...</td></tr>
                   ) : pedidosPaginados.length === 0 ? (
-                    <tr>
-                      <td colSpan={5} style={{textAlign: 'center', padding: '30px', color: '#9ca3af', fontSize: '0.9rem'}}>
-                        Ningún pedido coincide con los criterios de búsqueda o filtros seleccionados.
-                      </td>
-                    </tr>
+                    <tr><td colSpan={5} style={{textAlign: 'center', padding: '30px', color: '#9ca3af'}}>Sin resultados.</td></tr>
                   ) : (
                     pedidosPaginados.map((p) => (
                       <tr key={p.id} style={tableRow}>
@@ -362,43 +322,23 @@ function App() {
               </table>
             </div>
 
-            {/* CONTROLES DE PAGINACIÓN */}
             {!cargandoTabla && pedidosFiltrados.length > 0 && (
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '15px', paddingTop: '15px', borderTop: '1px solid #3f4758' }}>
                 <span style={{ fontSize: '0.8rem', color: '#9ca3af' }}>
                   Mostrando {Math.min(pedidosFiltrados.length, (paginaActual - 1) * pedidosPorPagina + 1)} - {Math.min(pedidosFiltrados.length, paginaActual * pedidosPorPagina)} de {pedidosFiltrados.length} pedidos
                 </span>
                 <div style={{ display: 'flex', gap: '8px' }}>
-                  <button 
-                    disabled={paginaActual === 1} 
-                    onClick={() => setPaginaActual(prev => prev - 1)}
-                    style={{...actionBtn, padding: '5px 12px', background: paginaActual === 1 ? '#282d3b' : '#1e222b', color: paginaActual === 1 ? '#555' : '#a855f7', cursor: paginaActual === 1 ? 'not-allowed' : 'pointer'}}
-                  >
-                    Anterior
-                  </button>
-                  <span style={{ color: '#fff', fontSize: '0.85rem', alignSelf: 'center', fontWeight: 'bold' }}>
-                    {paginaActual} / {totalPaginas}
-                  </span>
-                  <button 
-                    disabled={paginaActual === totalPaginas} 
-                    onClick={() => setPaginaActual(prev => prev + 1)}
-                    style={{...actionBtn, padding: '5px 12px', background: paginaActual === totalPaginas ? '#282d3b' : '#1e222b', color: paginaActual === totalPaginas ? '#555' : '#a855f7', cursor: paginaActual === totalPaginas ? 'not-allowed' : 'pointer'}}
-                  >
-                    Siguiente
-                  </button>
+                  <button disabled={paginaActual === 1} onClick={() => setPaginaActual(prev => prev - 1)} style={actionBtn}>Anterior</button>
+                  <span style={{ color: '#fff', fontSize: '0.85rem', alignSelf: 'center', fontWeight: 'bold' }}>{paginaActual} / {totalPaginas}</span>
+                  <button disabled={paginaActual === totalPaginas} onClick={() => setPaginaActual(prev => prev + 1)} style={actionBtn}>Siguiente</button>
                 </div>
               </div>
             )}
           </section>
         </div>
       </div>
-
-      {/* --- MEJORA 3: COMPONENTE VISUAL INTEGRADO DEL TOAST FLOTANTE --- */}
       {toast.visible && (
-        <div style={{
-          ...toastBoxContainer,
-          borderLeft: toast.tipo === 'exito' ? '4px solid #10b981' : '4px solid #ef4444'
-        }}>
+        <div style={{...toastBoxContainer, borderLeft: toast.tipo === 'exito' ? '4px solid #10b981' : '4px solid #ef4444'}}>
           {toast.tipo === 'exito' ? <CheckCircle2 size={18} color="#10b981" /> : <AlertCircle size={18} color="#ef4444" />}
           <span style={{ fontSize: '0.85rem', fontWeight: '500' }}>{toast.mensaje}</span>
         </div>
@@ -407,7 +347,6 @@ function App() {
   );
 }
 
-// ESTILOS DE INTERFAZ MANTENIDOS Y ACTUALIZADOS
 const darkBg = { backgroundColor: '#1e222b', minHeight: '100vh', padding: '20px', color: '#fff', fontFamily: 'sans-serif' };
 const headerStyle = { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' };
 const userCard = { display: 'flex', alignItems: 'center', gap: '15px', backgroundColor: '#282d3b', padding: '8px 15px', borderRadius: '10px', border: '1px solid #3f4758' };
@@ -430,8 +369,6 @@ const tableHeaderRow = { textAlign: 'left' as 'left', color: '#a0aec0', fontSize
 const tableRow = { borderBottom: '1px solid #3f4758', height: '40px' };
 const actionBtn = { background: '#1e222b', border: '1px solid #3f4758', borderRadius: '5px', cursor: 'pointer', padding: '5px', color: '#a855f7' };
 const lockBanner = { gridColumn: 'span 2', padding: '10px', backgroundColor: '#211633', color: '#a855f7', textAlign: 'center' as 'center', fontSize: '0.7rem', borderRadius: '8px' };
-
-// ESTILOS NUEVOS PARA FILTROS Y TOAST
 const filterBarContainer = { display: 'flex', alignItems: 'center', gap: '15px', backgroundColor: '#1e222b', padding: '10px 15px', borderRadius: '8px', border: '1px solid #3f4758' };
 const filterDropdown = { backgroundColor: '#282d3b', color: '#fff', border: '1px solid #3f4758', padding: '6px 10px', borderRadius: '6px', fontSize: '0.8rem', outline: 'none', cursor: 'pointer', flex: 1 };
 const toastBoxContainer = { position: 'fixed' as 'fixed', bottom: '25px', right: '25px', backgroundColor: '#282d3b', color: '#fff', padding: '14px 20px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '12px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.4)', zIndex: 1000, minWidth: '250px' };
