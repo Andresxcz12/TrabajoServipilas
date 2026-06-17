@@ -2,26 +2,31 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 
 interface LoginProps {
-  alEntrar: (datos: { email: string; password: string }) => Promise<any>;
+  alEntrar: (datos: { email: string; rol: string }) => void;
 }
+
+const usuariosValidos = [
+  { email: 'admin@test.com', pass: '123456', rol: 'admin' },
+  { email: 'empleado@test.com', pass: '123456', rol: 'empleado' }
+];
 
 export const Login = ({ alEntrar }: LoginProps) => {
   const [inputEmail, setInputEmail] = useState('');
   const [inputPassword, setInputPassword] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
 
-  const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
+  const handleLogin = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
 
-    try {
-      await alEntrar({ email: inputEmail, password: inputPassword });
-    } catch (err) {
-      setError('Credenciales incorrectas o error de conexión');
-    } finally {
-      setLoading(false);
+    const usuarioEncontrado = usuariosValidos.find(
+      (u) => u.email === inputEmail && u.pass === inputPassword
+    );
+
+    if (usuarioEncontrado) {
+      alEntrar({ email: usuarioEncontrado.email, rol: usuarioEncontrado.rol });
+    } else {
+      setError('Credenciales incorrectas');
     }
   };
 
@@ -54,7 +59,6 @@ export const Login = ({ alEntrar }: LoginProps) => {
 
         <button
           type="submit"
-          disabled={loading}
           style={{
             width: '100%',
             padding: '14px',
@@ -63,11 +67,10 @@ export const Login = ({ alEntrar }: LoginProps) => {
             background: '#8b5cf6',
             color: '#fff',
             fontWeight: 700,
-            cursor: loading ? 'not-allowed' : 'pointer',
-            opacity: loading ? 0.7 : 1,
+            cursor: 'pointer',
           }}
         >
-          {loading ? 'Ingresando...' : 'Entrar'}
+          Entrar
         </button>
         {error && <div style={{ marginTop: '16px', color: '#f87171' }}>{error}</div>}
       </form>
