@@ -4,13 +4,15 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Configuración de CORS
+  // Configuración robusta de CORS
   app.enableCors({
-    origin: ['https://trabajo-servipilas-7ucx1d8yc-andresxcz.vercel.app'], // Pon aquí la URL exacta de tu frontend
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    origin: '*', // O intenta con: ['https://trabajo-servipilas-7ucx1d8yc-andresxcz.vercel.app']
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    allowedHeaders: 'Content-Type, Accept, Authorization',
     credentials: true,
   });
 
-  await app.listen(process.env.PORT || 3000);
+  const port = process.env.PORT || 3000;
+  await app.listen(port);
 }
 bootstrap();
