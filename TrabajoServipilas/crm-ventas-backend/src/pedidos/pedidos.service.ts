@@ -5,25 +5,23 @@ import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class PedidosService {
+  
+  // --- LOGIN HARDCODEADO (Sin Firebase) ---
   async login(loginDto: LoginDto) {
     const { email, password } = loginDto;
-    // 1. Busca en la colección 'usuarios'
-    const snapshot = await db.collection('usuario')
-      .where('email', '==', email)
-      .get();
 
-    if (snapshot.empty) throw new UnauthorizedException('Usuario no encontrado');
+    // Define aquí tus credenciales permitidas
+    const ADMIN_EMAIL = "admin@ventas.com"; // Cámbialo por el email que quieras
+    const ADMIN_PASSWORD = "tu_contraseña_segura"; // Cámbialo por la contraseña que quieras
 
-    const usuario = snapshot.docs[0].data();
-
-    // 2. Verifica la contraseña (asegúrate que en Firestore sea "123456")
-    if (usuario.password !== password) {
-      throw new UnauthorizedException('Contraseña incorrecta');
+    if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+      return { email: email, rol: 'admin' };
+    } else {
+      throw new UnauthorizedException('Correo o contraseña incorrectos');
     }
-
-    return { email: usuario.email, rol: usuario.rol };
   }
 
+  // --- RESTO DE FUNCIONES (Siguen usando Firebase) ---
   private collection = db.collection('pedidos');
 
   async crear(createPedidoDto: CreatePedidoDto) {
@@ -35,16 +33,14 @@ export class PedidosService {
     const snapshot = await this.collection.get();
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   }
-  // Añade esto dentro de la clase PedidosService
-async actualizar(id: string, updatePedidoDto: any) {
-  await this.collection.doc(id).update(updatePedidoDto);
-  return { message: 'Pedido actualizado' };
-}
 
-async eliminar(id: string) {
-  // Asegúrate de que "collection" sea la referencia a tu colección en Firebase
-  await this.collection.doc(id).delete();
-  return { deleted: true };
-}
+  async actualizar(id: string, updatePedidoDto: any) {
+    await this.collection.doc(id).update(updatePedidoDto);
+    return { message: 'Pedido actualizado' };
+  }
 
+  async eliminar(id: string) {
+    await this.collection.doc(id).delete();
+    return { deleted: true };
+  }
 }
