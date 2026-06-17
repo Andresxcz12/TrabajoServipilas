@@ -1,25 +1,10 @@
-import { Controller, Post, Body, Get, Patch, Delete, Param, UnauthorizedException } from '@nestjs/common';
+import { Controller, Post, Body, Get, Patch, Delete, Param } from '@nestjs/common';
 import { PedidosService } from './pedidos.service';
 import { CreatePedidoDto } from './dto/create-pedido.dto';
-import { LoginDto } from './dto/login.dto';
 
 @Controller('pedidos')
 export class PedidosController {
   constructor(private readonly pedidosService: PedidosService) {}
-
-  @Post('login')
-  async login(@Body() loginDto: LoginDto) {
-    // 1. Llamamos al servicio para validar
-    const usuario = await this.pedidosService.login(loginDto);
-    
-    // 2. Si el servicio devuelve null, lanzamos el error 401 que ves en consola
-    if (!usuario) {
-      throw new UnauthorizedException('Credenciales inválidas');
-    }
-    
-    // 3. Si todo está bien, devolvemos el objeto del usuario (email, rol, etc.)
-    return usuario;
-  }
 
   @Post()
   crear(@Body() createPedidoDto: CreatePedidoDto) {
