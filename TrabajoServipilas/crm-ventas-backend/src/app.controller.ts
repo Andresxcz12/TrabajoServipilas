@@ -1,6 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
-import { firebaseCredSummary } from './firebase.config';
 
 @Controller()
 export class AppController {
@@ -11,8 +10,4 @@ export class AppController {
     return this.appService.getHello();
   }
 
-  @Get('health/cred')
-  getFirebaseCred() {
-    return { firebase: firebaseCredSummary };
-  }
 }

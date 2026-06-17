@@ -1,17 +1,33 @@
 import { Injectable } from '@nestjs/common';
 import { db } from '../firebase.config';
 import { LoginDto } from './dto/login.dto';
+import { CreatePedidoDto } from './dto/create-pedido.dto';
 
 @Injectable()
 export class PedidosService {
   private collection = db.collection('pedidos');
 
-  // Asegúrate de que el login esté aquí
-  async login(loginDto: LoginDto) {
-    /* ... tu lógica ... */ 
+  async login(loginDto: LoginDto): Promise<any | null> {
+    const snapshot = await this.collection.where('email', '==', loginDto.email).get();
+    if (snapshot.empty) {
+      return null;
+    }
+
+    const userDoc = snapshot.docs[0];
+    const user = { id: userDoc.id, ...userDoc.data() };
+
+    if (loginDto.password && user && (user as any).password === loginDto.password) {
+      return user;
+    }
+
+    return null;
   }
 
-  // Asegúrate de que estos métodos existan DENTRO de la clase
+  async crear(createPedidoDto: CreatePedidoDto) {
+    const docRef = await this.collection.add(createPedidoDto);
+    return { id: docRef.id, ...createPedidoDto };
+  }
+
   async obtenerTodos() {
     const snapshot = await this.collection.get();
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
