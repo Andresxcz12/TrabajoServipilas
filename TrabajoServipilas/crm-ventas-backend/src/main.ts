@@ -6,7 +6,7 @@ async function bootstrap() {
 
   // Configuración robusta de CORS
   app.enableCors({
-    origin: '*', // O intenta con: ['https://trabajo-servipilas-7ucx1d8yc-andresxcz.vercel.app']
+    origin: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     allowedHeaders: 'Content-Type, Accept, Authorization',
     credentials: true,

@@ -31,28 +31,55 @@ export const Login = ({ alEntrar }: LoginProps) => {
   };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#111827' }}>
-      <form onSubmit={handleLogin} style={{ width: '100%', maxWidth: '380px', padding: '32px', borderRadius: '16px', background: '#1f2937', boxShadow: '0 20px 60px rgba(0,0,0,0.35)' }}>
-        <h2 style={{ color: '#f8fafc', marginBottom: '24px', textAlign: 'center' }}>Iniciar sesión</h2>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0b1220' }}>
+      <form
+        onSubmit={handleLogin}
+        style={{
+          width: '100%',
+          maxWidth: '420px',
+          padding: '36px',
+          borderRadius: '22px',
+          background: '#0f172a',
+          boxShadow: '0 35px 90px rgba(0, 0, 0, 0.45)',
+          border: '1px solid rgba(139,92,246,0.3)',
+        }}
+      >
+        <h2 style={{ color: '#c084fc', marginBottom: '24px', textAlign: 'center', fontSize: '1.8rem' }}>Acceso al Sistema</h2>
 
-        <label style={{ display: 'block', marginBottom: '10px', color: '#e5e7eb' }}>
+        <label style={{ display: 'block', marginBottom: '14px', color: '#e5e7eb' }}>
           Email
           <input
             type="email"
             value={inputEmail}
             onChange={(e) => setInputEmail(e.target.value)}
-            style={{ width: '100%', padding: '12px 14px', marginTop: '8px', borderRadius: '10px', border: '1px solid #374151', background: '#111827', color: '#f8fafc' }}
+            style={{
+              width: '100%',
+              padding: '14px 16px',
+              marginTop: '10px',
+              borderRadius: '14px',
+              border: '1px solid rgba(148,163,184,0.2)',
+              background: '#111827',
+              color: '#f8fafc',
+            }}
             required
           />
         </label>
 
-        <label style={{ display: 'block', marginBottom: '20px', color: '#e5e7eb' }}>
+        <label style={{ display: 'block', marginBottom: '24px', color: '#e5e7eb' }}>
           Contraseña
           <input
             type="password"
             value={inputPassword}
             onChange={(e) => setInputPassword(e.target.value)}
-            style={{ width: '100%', padding: '12px 14px', marginTop: '8px', borderRadius: '10px', border: '1px solid #374151', background: '#111827', color: '#f8fafc' }}
+            style={{
+              width: '100%',
+              padding: '14px 16px',
+              marginTop: '10px',
+              borderRadius: '14px',
+              border: '1px solid rgba(148,163,184,0.2)',
+              background: '#111827',
+              color: '#f8fafc',
+            }}
             required
           />
         </label>
@@ -61,18 +88,20 @@ export const Login = ({ alEntrar }: LoginProps) => {
           type="submit"
           style={{
             width: '100%',
-            padding: '14px',
-            borderRadius: '12px',
+            padding: '15px',
+            borderRadius: '14px',
             border: 'none',
             background: '#8b5cf6',
-            color: '#fff',
+            color: '#ffffff',
             fontWeight: 700,
+            fontSize: '1rem',
+            letterSpacing: '0.5px',
             cursor: 'pointer',
           }}
         >
-          Entrar
+          ENTRAR
         </button>
-        {error && <div style={{ marginTop: '16px', color: '#f87171' }}>{error}</div>}
+        {error && <div style={{ marginTop: '18px', color: '#fb7185', textAlign: 'center' }}>{error}</div>}
       </form>
     </div>
   );
