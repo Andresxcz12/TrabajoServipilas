@@ -5,10 +5,11 @@ import { CreatePedidoDto } from './dto/create-pedido.dto';
 
 @Injectable()
 export class PedidosService {
-  private collection = db.collection('pedidos');
+  private readonly pedidosCollection = db.collection('pedidos');
+  private readonly usuariosCollection = db.collection('usuarios');
 
   async login(loginDto: LoginDto): Promise<any | null> {
-    const snapshot = await this.collection.where('email', '==', loginDto.email).get();
+    const snapshot = await this.usuariosCollection.where('email', '==', loginDto.email).get();
     if (snapshot.empty) {
       return null;
     }
@@ -24,22 +25,22 @@ export class PedidosService {
   }
 
   async crear(createPedidoDto: CreatePedidoDto) {
-    const docRef = await this.collection.add(createPedidoDto);
+    const docRef = await this.pedidosCollection.add(createPedidoDto);
     return { id: docRef.id, ...createPedidoDto };
   }
 
   async obtenerTodos() {
-    const snapshot = await this.collection.get();
+    const snapshot = await this.pedidosCollection.get();
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   }
 
   async eliminar(id: string) {
-    await this.collection.doc(id).delete();
+    await this.pedidosCollection.doc(id).delete();
     return { deleted: true };
   }
 
   async actualizar(id: string, updatePedidoDto: any) {
-    await this.collection.doc(id).update(updatePedidoDto);
+    await this.pedidosCollection.doc(id).update(updatePedidoDto);
     return { message: 'Pedido actualizado' };
   }
 }

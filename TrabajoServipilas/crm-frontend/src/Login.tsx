@@ -2,29 +2,26 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 
 interface LoginProps {
-  alEntrar: (datos: { email: string; rol: string }) => void;
+  alEntrar: (datos: { email: string; password: string }) => Promise<any>;
 }
-
-const usuariosValidos = [
-  { email: 'admin@test.com', pass: '123456', rol: 'admin' },
-  { email: 'empleado@test.com', pass: '123456', rol: 'empleado' }
-];
 
 export const Login = ({ alEntrar }: LoginProps) => {
   const [inputEmail, setInputEmail] = useState('');
   const [inputPassword, setInputPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e: FormEvent<HTMLFormElement>) => {
+  const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError('');
+    setLoading(true);
 
-    const usuarioEncontrado = usuariosValidos.find(
-      (u) => u.email === inputEmail && u.pass === inputPassword
-    );
-
-    if (usuarioEncontrado) {
-      alEntrar({ email: usuarioEncontrado.email, rol: usuarioEncontrado.rol });
-    } else {
-      alert('Credenciales incorrectas');
+    try {
+      await alEntrar({ email: inputEmail, password: inputPassword });
+    } catch (err) {
+      setError('Credenciales incorrectas o error de conexión');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -55,9 +52,24 @@ export const Login = ({ alEntrar }: LoginProps) => {
           />
         </label>
 
-        <button type="submit" style={{ width: '100%', padding: '14px', borderRadius: '12px', border: 'none', background: '#8b5cf6', color: '#fff', fontWeight: 700, cursor: 'pointer' }}>
-          Entrar
+        <button
+          type="submit"
+          disabled={loading}
+          style={{
+            width: '100%',
+            padding: '14px',
+            borderRadius: '12px',
+            border: 'none',
+            background: '#8b5cf6',
+            color: '#fff',
+            fontWeight: 700,
+            cursor: loading ? 'not-allowed' : 'pointer',
+            opacity: loading ? 0.7 : 1,
+          }}
+        >
+          {loading ? 'Ingresando...' : 'Entrar'}
         </button>
+        {error && <div style={{ marginTop: '16px', color: '#f87171' }}>{error}</div>}
       </form>
     </div>
   );

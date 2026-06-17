@@ -37,6 +37,20 @@ function App() {
 
   const [formData, setFormData] = useState<Pedido>(estadoInicial);
 
+  const handleLogin = async (loginDto: { email: string; password: string }) => {
+    try {
+      const res = await axios.post(`${API_URL}/pedidos/login`, loginDto);
+      setUsuario(res.data);
+      return res.data;
+    } catch (error) {
+      const mensaje = axios.isAxiosError(error) && error.response?.status === 401
+        ? 'Credenciales incorrectas'
+        : 'Error al conectar con el servidor';
+      lanzarToast(mensaje, 'error');
+      throw error;
+    }
+  };
+
   const lanzarToast = (mensaje: string, tipo: 'exito' | 'error' = 'exito') => {
     setToast({ mensaje, visible: true, tipo });
     setTimeout(() => {
@@ -160,7 +174,7 @@ function App() {
     }
   };
 
-  if (!usuario) return <Login alEntrar={(datos) => setUsuario(datos)} />;
+  if (!usuario) return <Login alEntrar={handleLogin} />;
 
   return (
     <div style={darkBg}>
