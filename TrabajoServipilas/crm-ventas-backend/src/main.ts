@@ -4,9 +4,9 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // ESTA ES LA PARTE QUE DEBES AÑADIR/MODIFICAR:
+  // Configuración de CORS
   app.enableCors({
-    origin: '*', // En producción, es mejor poner solo la URL de tu frontend de Vercel
+    origin: ['https://trabajo-servipilas-7ucx1d8yc-andresxcz.vercel.app'], // Pon aquí la URL exacta de tu frontend
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
