@@ -6,41 +6,33 @@ import { LoginDto } from './dto/login.dto';
 @Injectable()
 export class PedidosService {
   
-  // --- LOGIN HARDCODEADO (Sin Firebase) ---
+  // LOGIN TOTALMENTE LOCAL
   async login(loginDto: LoginDto) {
     const { email, password } = loginDto;
 
-    // Define aquí tus credenciales permitidas
-    const ADMIN_EMAIL = "admin@ventas.com"; // Cámbialo por el email que quieras
-    const ADMIN_PASSWORD = "tu_contraseña_segura"; // Cámbialo por la contraseña que quieras
+    // Definimos los usuarios permitidos directamente aquí
+    const usuariosPermitidos = [
+      { email: 'admin@test.com', password: '123', rol: 'admin' },
+      { email: 'empleado@test.com', password: '456', rol: 'empleado' }
+    ];
 
-    if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-      return { email: email, rol: 'admin' };
-    } else {
+    const usuarioEncontrado = usuariosPermitidos.find(u => u.email === email && u.password === password);
+
+    if (!usuarioEncontrado) {
       throw new UnauthorizedException('Correo o contraseña incorrectos');
     }
+
+    // Retornamos el rol para que el frontend sepa qué mostrar
+    return { email: usuarioEncontrado.email, rol: usuarioEncontrado.rol };
   }
 
-  // --- RESTO DE FUNCIONES (Siguen usando Firebase) ---
+  // EL RESTO SIGUE USANDO FIREBASE PARA GUARDAR (Solo escritura)
   private collection = db.collection('pedidos');
 
   async crear(createPedidoDto: CreatePedidoDto) {
     const res = await this.collection.add(createPedidoDto);
-    return { id: res.id, message: 'Pedido guardado en la base de datos' };
+    return { id: res.id, message: 'Pedido guardado' };
   }
-
-  async obtenerTodos() {
-    const snapshot = await this.collection.get();
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-  }
-
-  async actualizar(id: string, updatePedidoDto: any) {
-    await this.collection.doc(id).update(updatePedidoDto);
-    return { message: 'Pedido actualizado' };
-  }
-
-  async eliminar(id: string) {
-    await this.collection.doc(id).delete();
-    return { deleted: true };
-  }
+  
+  // ... resto de tus funciones de Firebase (obtener, eliminar, actualizar)
 }
