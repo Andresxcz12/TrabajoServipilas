@@ -21,6 +21,13 @@ try {
     serviceAccount = JSON.parse(readFileSync(credentialsPath, 'utf8'));
     source = 'GOOGLE_APPLICATION_CREDENTIALS';
   } else {
+    // In production we must not rely on a checked-in local file.
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error(
+        'Firebase service account not provided. Set FIREBASE_SERVICE_ACCOUNT or FIREBASE_SERVICE_ACCOUNT_BASE64 environment variable in production.'
+      );
+    }
+
     serviceAccount = JSON.parse(readFileSync(localServiceAccount, 'utf8'));
     source = 'src/config/serviceAccount.json';
   }
