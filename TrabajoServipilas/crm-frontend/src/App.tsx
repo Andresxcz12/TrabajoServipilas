@@ -5,8 +5,7 @@ import { LayoutDashboard, ShoppingCart, ClipboardList, Pencil, Trash2, LogOut, S
 import { Login } from './Login';
 
 function App() {
-  // CAMBIA ESTA URL POR LA TUYA DE RAILWAY
-  const API_URL = 'https://trabajo-servipilas-production.up.railway.app';
+  const API_URL = import.meta.env.VITE_API_URL || 'https://trabajo-servipilas-production.up.railway.app';
 
   const [usuario, setUsuario] = useState<any>(null);
   const [listaPedidos, setListaPedidos] = useState<any[]>([]);

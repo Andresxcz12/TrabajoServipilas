@@ -4,9 +4,20 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Configuración explícita para aceptar tu dominio de Vercel
+  const allowedOrigins = [
+    process.env.FRONTEND_URL || 'https://trabajo-servipilas.vercel.app',
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+  ];
+
   app.enableCors({
-    origin: 'https://trabajo-servipilas.vercel.app', 
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('CORS policy: disallowed origin'));
+      }
+    },
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
