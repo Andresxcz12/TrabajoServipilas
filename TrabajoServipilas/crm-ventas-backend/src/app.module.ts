@@ -1,11 +1,10 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { PedidosModule } from './pedidos/pedidos.module';
+import { PedidosController } from './pedidos/pedidos.controller'; // Verifica esta ruta
+import { PedidosService } from './pedidos/pedidos.service';
 
 @Module({
-  imports: [PedidosModule],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [],
+  controllers: [PedidosController], // <--- ES CRUCIAL QUE ESTÉ AQUÍ
+  providers: [PedidosService],
 })
 export class AppModule {}
