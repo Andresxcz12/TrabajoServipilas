@@ -12,14 +12,18 @@ async function bootstrap() {
 
   app.enableCors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
+      // Allow local development, specific frontend URL, or any vercel.app domain
+      if (!origin || 
+          allowedOrigins.includes(origin) || 
+          (origin && origin.includes('vercel.app'))) {
         callback(null, true);
       } else {
         callback(new Error('CORS policy: disallowed origin'));
       }
     },
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
+    allowedHeaders: 'Content-Type,Authorization',
   });
 
   await app.listen(process.env.PORT || 3000);
