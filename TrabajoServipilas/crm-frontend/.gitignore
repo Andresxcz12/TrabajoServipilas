@@ -20,7 +20,11 @@ dist-ssr
 *.suo
 *.ntvs*
 *.njsproj
+*.njsproj
 *.sln
 *.sw?
+
+# dotenv files
+.env.development
 
 .vercel

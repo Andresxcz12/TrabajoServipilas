@@ -5,7 +5,7 @@ import { LayoutDashboard, ShoppingCart, ClipboardList, Pencil, Trash2, LogOut, S
 import { Login } from './Login';
 
 function App() {
-  const API_URL = import.meta.env.VITE_API_URL || 'https://trabajo-servipilas-production.up.railway.app';
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
   const [usuario, setUsuario] = useState<any>(null);
   const [listaPedidos, setListaPedidos] = useState<any[]>([]);

@@ -1,28 +1,38 @@
 import { Injectable } from '@nestjs/common';
-import { db } from '../firebase.config';
+import { query } from '../db';
 import { CreatePedidoDto } from './dto/create-pedido.dto';
 
 @Injectable()
 export class PedidosService {
-  private readonly pedidosCollection = db.collection('pedidos');
-
   async crear(createPedidoDto: CreatePedidoDto) {
-    const docRef = await this.pedidosCollection.add(createPedidoDto);
-    return { id: docRef.id, ...createPedidoDto };
+    const keys = Object.keys(createPedidoDto);
+    const cols = keys.join(', ');
+    const vals = keys.map((_, i) => `$${i + 1}`).join(', ');
+    const params = keys.map(k => (createPedidoDto as any)[k]);
+
+    const res = await query(
+      `INSERT INTO pedidos(${cols}) VALUES(${vals}) RETURNING id, ${cols}`,
+      params,
+    );
+    return res.rows[0];
   }
 
   async obtenerTodos() {
-    const snapshot = await this.pedidosCollection.get();
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const res = await query('SELECT * FROM pedidos ORDER BY id DESC');
+    return res.rows;
   }
 
   async eliminar(id: string) {
-    await this.pedidosCollection.doc(id).delete();
+    await query('DELETE FROM pedidos WHERE id = $1', [id]);
     return { deleted: true };
   }
 
   async actualizar(id: string, updatePedidoDto: any) {
-    await this.pedidosCollection.doc(id).update(updatePedidoDto);
+    const keys = Object.keys(updatePedidoDto);
+    const sets = keys.map((k, i) => `${k} = $${i + 1}`).join(', ');
+    const params = keys.map(k => updatePedidoDto[k]);
+    params.push(id);
+    await query(`UPDATE pedidos SET ${sets} WHERE id = $${keys.length + 1}`, params);
     return { message: 'Pedido actualizado' };
   }
 }
