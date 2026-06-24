@@ -5,11 +5,14 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.enableCors({
-    origin: [
-      'https://trabajo-servipilas-27ct21rp0-andresxcz.vercel.app', // Tu frontend real
-      'http://localhost:5173', // Por si pruebas en local
-      '*' // Comodín por si falla el anterior
-    ],
+    origin: function (origin, callback) {
+      // Permite cualquier subdominio de vercel.app y localhost para desarrollo
+      if (!origin || origin.endsWith('.vercel.app') || origin.startsWith('http://localhost')) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
