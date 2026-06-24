@@ -4,13 +4,21 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Esto permite que tu frontend en Vercel se comunique con el backend
+  // Permite cualquier subdominio de Vercel, localhost y el proxy de Railway
   app.enableCors({
-    origin: [
-      process.env.FRONTEND_URL || 'https://trabajo-servipilas-owkk2r57j-andresxcz.vercel.app',
-      'https://trabajoservipilas-production.up.railway.app',
-      'https://trabajo-servipilas-phe0v42cc-andresxcz.vercel.app',
-    ],
+    origin: (origin, callback) => {
+      if (
+        !origin ||
+        origin.includes('vercel.app') ||
+        origin.includes('localhost') ||
+        origin.includes('127.0.0.1') ||
+        origin.includes('proxy.rlwy.net')
+      ) {
+        callback(null, true);
+      } else {
+        callback(null, false);
+      }
+    },
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
