@@ -13,5 +13,8 @@ pool.on('error', (err) => {
 });
 
 export async function query(text: string, params?: any[]) {
-  return pool.query(text, params);
+  const res = await pool.query(text, params);
+  return res;
 }
+
+export default pool;
